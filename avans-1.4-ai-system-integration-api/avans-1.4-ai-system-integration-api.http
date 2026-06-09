@@ -1,0 +1,6 @@
+@avans_1._4_ai_system_integration_api_HostAddress = http://localhost:5293
+
+GET {{avans_1._4_ai_system_integration_api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
