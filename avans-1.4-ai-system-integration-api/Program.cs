@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using System.Reflection;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +48,19 @@ if (string.IsNullOrWhiteSpace(sqlConnectionString))
     throw new InvalidOperationException("Configuration value 'SqlConnectionString' is missing or empty.");
 }
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!))
+        };
+    });
+builder.Services.AddAuthorization();
 // Register the EF database context with the specified SQL connection string.
 builder.Services.AddDbContext<TrashDetectionDbContext>(options => options.UseSqlServer(sqlConnectionString));
 
