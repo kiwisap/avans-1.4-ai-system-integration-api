@@ -1,8 +1,7 @@
-﻿namespace avans_1._4_ai_system_integration_api.Services
+﻿namespace avans_1._4_ai_system_integration_api.Services;
+
+public interface IAuthenticationService
 {
-    public interface IAuthenticationService
-    {
-        string? GetCurrentAuthenticatedUserId();
-    }
+    string? GetCurrentAuthenticatedUserId();
 }
 

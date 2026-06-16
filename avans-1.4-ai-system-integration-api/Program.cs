@@ -1,13 +1,13 @@
 using avans_1._4_ai_system_integration_api.Models.Entities;
 using avans_1_4_ai_system_integration_api.Data;
 using avans_1_4_ai_system_integration_api.Exceptions;
+using avans_1._4_ai_system_integration_api.Mapping.Interfaces;
+using avans_1._4_ai_system_integration_api.Mapping;
+using avans_1._4_ai_system_integration_api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using System.Reflection;
 using System.Text.Json;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +35,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
 // Register authorization services for securing endpoints.
@@ -47,28 +48,16 @@ if (string.IsNullOrWhiteSpace(sqlConnectionString))
 {
     throw new InvalidOperationException("Configuration value 'SqlConnectionString' is missing or empty.");
 }
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!))
-        };
-    });
-builder.Services.AddAuthorization();
 // Register the EF database context with the specified SQL connection string.
 builder.Services.AddDbContext<TrashDetectionDbContext>(options => options.UseSqlServer(sqlConnectionString));
+
 
 // Register ASP.NET Core Identity with entity framework stores and configure password and user requirements.
 builder.Services.AddIdentityApiEndpoints<User>(options =>
 {
     options.User.RequireUniqueEmail = true;
-    options.Password.RequiredLength = 10;
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+    options.Password.RequiredLength = 8;
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
@@ -78,6 +67,11 @@ builder.Services.AddIdentityApiEndpoints<User>(options =>
 
 // Register IHttpContextAccessor for accessing HTTP context in services (e.g., to get current user info).
 builder.Services.AddHttpContextAccessor();
+
+// Register services for handling user account operations
+builder.Services.AddScoped<IUserMappingService, UserMappingService>();
+builder.Services.AddTransient<IAccountService, AccountService>();
+
 
 var app = builder.Build();
 
