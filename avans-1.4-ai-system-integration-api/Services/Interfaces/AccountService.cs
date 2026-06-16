@@ -36,35 +36,12 @@ public class AccountService : IAccountService
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
-            // Tijdelijk: kijk welke errors er precies zijn
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            throw new BadRequestException(errors);
-        }
-        //var result = await _userManager.CreateAsync(user, request.Password);
-        //if (!result.Succeeded)
-        //{
-        //    throw new ValidationException(result.Errors
-        //        .GroupBy(e => e.Code)
-        //        .ToDictionary(
-        //            g => g.Key,
-        //            g => g.Select(e => e.Description).ToArray()
-        //        ));
-        //}
-
-        // User omzetten naar UserDTO zodat we nooit het volledige User object teruggeven
-        return _userMappingService.UserToUserDto(user);
-    }
-    public async Task<UserDTO> LoginAsync(LoginDTO request)
-    {
-        var user = await _userManager.FindByEmailAsync(request.Email);
-        if (user == null)
-        {
-            throw new NotFoundException("Gebruiker niet gevonden.");
-        }
-        var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
-        if (!passwordValid)
-        {
-            throw new UnauthorizedAccessException("Ongeldig wachtwoord.");
+            throw new ValidationException(result.Errors
+                .GroupBy(e => e.Code)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(e => e.Description).ToArray()
+                ));
         }
         return _userMappingService.UserToUserDto(user);
     }

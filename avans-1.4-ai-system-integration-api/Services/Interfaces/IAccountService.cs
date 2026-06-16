@@ -7,6 +7,4 @@ public interface IAccountService
 {
     Task<UserDTO> RegisterAsync(RegisterDTO request);
     Task<UserDTO> GetCurrentUserAsync(ClaimsPrincipal principal);
-    Task<UserDTO> LoginAsync(LoginDTO request);
-
 }

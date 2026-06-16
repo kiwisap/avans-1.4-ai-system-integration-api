@@ -15,7 +15,6 @@ public class AuthController : ControllerBase
 
     public AuthController(IAccountService accountService)
     {
-
         _accountService = accountService;
     }
 
@@ -34,14 +33,5 @@ public class AuthController : ControllerBase
     {
         var user = await _accountService.GetCurrentUserAsync(User);
         return Ok(user);
-    }
-
-    [HttpPost("login")]
-    [AllowAnonymous]
-    public async Task<IActionResult> Login([FromBody] LoginDTO request)
-    {
-        // Implement login logic here
-        var user = await _accountService.LoginAsync(request);
-        return Ok();
     }
 }
