@@ -22,8 +22,8 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 
 // Register a global exception handler middleware to catch and handle unhandled exceptions gracefully.
-builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<TrashDetectionExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // Register OpenAPI/Swagger for API documentation and testing.
 builder.Services.AddSwaggerGen(options =>
