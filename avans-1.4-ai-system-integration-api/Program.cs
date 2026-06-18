@@ -1,6 +1,9 @@
 using avans_1._4_ai_system_integration_api.Models.Entities;
 using avans_1_4_ai_system_integration_api.Data;
 using avans_1_4_ai_system_integration_api.Exceptions;
+using avans_1._4_ai_system_integration_api.Mapping.Interfaces;
+using avans_1._4_ai_system_integration_api.Mapping;
+using avans_1._4_ai_system_integration_api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using System.Reflection;
@@ -19,8 +22,8 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 
 // Register a global exception handler middleware to catch and handle unhandled exceptions gracefully.
-builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<TrashDetectionExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // Register OpenAPI/Swagger for API documentation and testing.
 builder.Services.AddSwaggerGen(options =>
@@ -31,6 +34,7 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1"
     });
 });
+
 
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
@@ -44,15 +48,16 @@ if (string.IsNullOrWhiteSpace(sqlConnectionString))
 {
     throw new InvalidOperationException("Configuration value 'SqlConnectionString' is missing or empty.");
 }
-
 // Register the EF database context with the specified SQL connection string.
 builder.Services.AddDbContext<TrashDetectionDbContext>(options => options.UseSqlServer(sqlConnectionString));
+
 
 // Register ASP.NET Core Identity with entity framework stores and configure password and user requirements.
 builder.Services.AddIdentityApiEndpoints<User>(options =>
 {
     options.User.RequireUniqueEmail = true;
-    options.Password.RequiredLength = 10;
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+    options.Password.RequiredLength = 8;
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
@@ -62,6 +67,11 @@ builder.Services.AddIdentityApiEndpoints<User>(options =>
 
 // Register IHttpContextAccessor for accessing HTTP context in services (e.g., to get current user info).
 builder.Services.AddHttpContextAccessor();
+
+// Register services for handling user account operations
+builder.Services.AddTransient<IUserMappingService, UserMappingService>();
+builder.Services.AddTransient<IAccountService, AccountService>();
+
 
 var app = builder.Build();
 
