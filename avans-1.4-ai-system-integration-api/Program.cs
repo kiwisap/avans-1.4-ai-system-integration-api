@@ -1,9 +1,12 @@
+using avans_1._4_ai_system_integration_api.Mapping;
+using avans_1._4_ai_system_integration_api.Mapping.Interfaces;
 using avans_1._4_ai_system_integration_api.Models.Entities;
+using avans_1._4_ai_system_integration_api.Repositories;
+using avans_1._4_ai_system_integration_api.Repositories.Interfaces;
+using avans_1._4_ai_system_integration_api.Services;
+using avans_1._4_ai_system_integration_api.Services.Interfaces;
 using avans_1_4_ai_system_integration_api.Data;
 using avans_1_4_ai_system_integration_api.Exceptions;
-using avans_1._4_ai_system_integration_api.Mapping.Interfaces;
-using avans_1._4_ai_system_integration_api.Mapping;
-using avans_1._4_ai_system_integration_api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using System.Reflection;
@@ -73,6 +76,30 @@ builder.Services.AddScoped<IUserMappingService, UserMappingService>();
 builder.Services.AddTransient<IAccountService, AccountService>();
 
 
+// HttpClient for the sensor API
+builder.Services.AddHttpClient<ISensorApiClient, SensorApiClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["SensorApi:BaseUrl"]!);
+});
+
+// Repository + Service
+builder.Services.AddScoped<ITrashDetectionRepository, TrashDetectionRepository>();
+builder.Services.AddScoped<ITrashDetectionService, TrashDetectionService>();
+
+
+// Register in-memory caching services for caching frequently accessed data and improving performance.
+builder.Services.AddMemoryCache();
+
+// Register an HttpClient for communicating with the external sensor API, with the base URL configured from app settings.
+builder.Services.AddHttpClient<ISensorApiClient, SensorApiClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["SensorApi:BaseUrl"]!);
+});
+
+// Register the repository and service for handling trash detection data, with scoped lifetimes to ensure a new instance per request.
+builder.Services.AddScoped<ITrashDetectionService, TrashDetectionService>();
+
+
 var app = builder.Build();
 
 // Apply any pending database migrations on startup to ensure the database schema is up to date.
@@ -101,6 +128,7 @@ else
 
     app.MapGet("/", () => currentHealthMessage);
 }
+
 
 // Enforce HTTPS for all requests.
 app.UseHttpsRedirection();

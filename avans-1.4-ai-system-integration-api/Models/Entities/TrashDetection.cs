@@ -17,12 +17,7 @@ public class TrashDetection
 
     public double CameraLatitude { get; set; }
     public double CameraLongitude { get; set; }
-
-    public double TrashLatitude { get; set; }
-    public double TrashLongitude { get; set; }
-
     public DateTime PhotoTakenAtUtc { get; set; }
-
     public double TemperatureCelsius { get; set; }
 
     public TrashType Type { get; set; }
