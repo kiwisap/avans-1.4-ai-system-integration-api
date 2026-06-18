@@ -14,6 +14,7 @@ public class UserMappingService : IUserMappingService
             Email = registerDto.Email
         };
     }
+
     public UserDTO UserToUserDto(User user)
     {
         return new UserDTO

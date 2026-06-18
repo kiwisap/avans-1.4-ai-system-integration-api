@@ -69,7 +69,7 @@ builder.Services.AddIdentityApiEndpoints<User>(options =>
 builder.Services.AddHttpContextAccessor();
 
 // Register services for handling user account operations
-builder.Services.AddScoped<IUserMappingService, UserMappingService>();
+builder.Services.AddTransient<IUserMappingService, UserMappingService>();
 builder.Services.AddTransient<IAccountService, AccountService>();
 
 

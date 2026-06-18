@@ -1,7 +1,5 @@
-﻿using avans_1._4_ai_system_integration_api.Models;
-using avans_1._4_ai_system_integration_api.Models.DTOs;
+﻿using avans_1._4_ai_system_integration_api.Models.DTOs;
 using avans_1._4_ai_system_integration_api.Services.Interfaces;
-using avans_1_4_ai_system_integration_api.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
