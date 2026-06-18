@@ -7,5 +7,6 @@ namespace avans_1_4_ai_system_integration_api.Data;
 public class TrashDetectionDbContext(DbContextOptions<TrashDetectionDbContext> options) : IdentityDbContext<User>(options)
 {
     public DbSet<TrashDetection> TrashDetections => Set<TrashDetection>();
+    public DbSet<TrashDataFetchLog> TrashDataFetchLogs => Set<TrashDataFetchLog>();
 
 }

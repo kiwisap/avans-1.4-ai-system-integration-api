@@ -86,10 +86,6 @@ builder.Services.AddHttpClient<ISensorApiClient, SensorApiClient>(client =>
 builder.Services.AddScoped<ITrashDetectionRepository, TrashDetectionRepository>();
 builder.Services.AddScoped<ITrashDetectionService, TrashDetectionService>();
 
-
-// Register in-memory caching services for caching frequently accessed data and improving performance.
-builder.Services.AddMemoryCache();
-
 // Register an HttpClient for communicating with the external sensor API, with the base URL configured from app settings.
 builder.Services.AddHttpClient<ISensorApiClient, SensorApiClient>(client =>
 {
@@ -97,6 +93,7 @@ builder.Services.AddHttpClient<ISensorApiClient, SensorApiClient>(client =>
 });
 
 // Register the repository and service for handling trash detection data, with scoped lifetimes to ensure a new instance per request.
+builder.Services.AddScoped<ITrashDetectionRepository, TrashDetectionRepository>();
 builder.Services.AddScoped<ITrashDetectionService, TrashDetectionService>();
 
 

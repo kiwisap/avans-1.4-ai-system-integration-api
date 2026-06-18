@@ -21,6 +21,8 @@ public class TrashDetection
     public double TemperatureCelsius { get; set; }
 
     public TrashType Type { get; set; }
-
     public bool Statiegeld { get; set; }
+   
+    // checkt of de data nog vers is
+    public DateTime FetchedAtUtc { get; set; }
 }
