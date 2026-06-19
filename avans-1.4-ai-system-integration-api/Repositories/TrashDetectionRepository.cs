@@ -21,9 +21,21 @@ public class TrashDetectionRepository : ITrashDetectionRepository
             .ToListAsync();
     }
 
+    // controleert per detectie of er al een record bestaat met dezelfde camera locatie en tijdstip, zo niet dan wordt deze toegevoegd
     public async Task AddRangeAsync(List<TrashDetection> detections)
     {
-        await _context.TrashDetections.AddRangeAsync(detections);
+        foreach (var detection in detections)
+        {
+            var alreadyExists = await _context.TrashDetections.AnyAsync(t =>
+                t.CameraLatitude == detection.CameraLatitude &&
+                t.CameraLongitude == detection.CameraLongitude &&
+                t.PhotoTakenAtUtc == detection.PhotoTakenAtUtc);
+
+            if (!alreadyExists)
+            {
+                await _context.TrashDetections.AddAsync(detection);
+            }
+        }
     }
 
     public async Task SaveChangesAsync()
