@@ -10,6 +10,7 @@ public class UserMappingService : IUserMappingService
     {
         return new User
         {
+            Name = registerDto.Name,
             UserName = registerDto.Email,
             Email = registerDto.Email
         };
@@ -19,6 +20,7 @@ public class UserMappingService : IUserMappingService
     {
         return new UserDTO
         {
+            Name = user.Name,
             Email = user.Email,
         };
     }

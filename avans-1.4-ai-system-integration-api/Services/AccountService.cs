@@ -6,7 +6,7 @@ using avans_1._4_ai_system_integration_api.Mapping.Interfaces;
 using avans_1._4_ai_system_integration_api.Models.DTOs;
 using System.Security.Claims;
 
-namespace avans_1._4_ai_system_integration_api.Services.Interfaces;
+namespace avans_1._4_ai_system_integration_api.Services;
 
 public class AccountService : IAccountService
 {
