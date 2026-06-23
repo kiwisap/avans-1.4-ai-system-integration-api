@@ -8,14 +8,13 @@ public class TrashDetectionDbContext(DbContextOptions<TrashDetectionDbContext> o
 {
     public DbSet<TrashDetection> TrashDetections => Set<TrashDetection>();
     public DbSet<TrashDataFetchLog> TrashDataFetchLogs => Set<TrashDataFetchLog>();
-
     //zorgt ervoor dat er geen dubbele entries in de database komen voor dezelfde locatie en tijdstip
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<TrashDetection>()
-            .HasIndex(t => new { t.CameraLatitude, t.CameraLongitude, t.PhotoTakenAtUtc })
+            .HasIndex(t => new { t.Latitude, t.Longitude, t.DateTime })
             .IsUnique();
     }
 }

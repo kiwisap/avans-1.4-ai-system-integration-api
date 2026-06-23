@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using avans_1_4_ai_system_integration_api.Data;
 
@@ -11,9 +12,11 @@ using avans_1_4_ai_system_integration_api.Data;
 namespace avans_1._4_ai_system_integration_api.Migrations
 {
     [DbContext(typeof(TrashDetectionDbContext))]
-    partial class TrashDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260622000033_UpdateTrashDetectionModel")]
+    partial class UpdateTrashDetectionModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -157,11 +160,9 @@ namespace avans_1._4_ai_system_integration_api.Migrations
 
             modelBuilder.Entity("avans_1._4_ai_system_integration_api.Models.Entities.TrashDataFetchLog", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("FetchedAtUtc")
                         .HasColumnType("datetime2");
@@ -183,40 +184,30 @@ namespace avans_1._4_ai_system_integration_api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<float>("Confidence")
-                        .HasColumnType("real");
+                    b.Property<double>("CameraLatitude")
+                        .HasColumnType("float");
 
-                    b.Property<DateTime>("DateTime")
-                        .HasColumnType("datetime2");
+                    b.Property<double>("CameraLongitude")
+                        .HasColumnType("float");
 
                     b.Property<DateTime>("FetchedAtUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("ImageId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<DateTime>("PhotoTakenAtUtc")
+                        .HasColumnType("datetime2");
 
-                    b.Property<float>("Latitude")
-                        .HasColumnType("real");
+                    b.Property<bool>("Statiegeld")
+                        .HasColumnType("bit");
 
-                    b.Property<float>("Longitude")
-                        .HasColumnType("real");
+                    b.Property<double>("TemperatureCelsius")
+                        .HasColumnType("float");
 
-                    b.Property<float>("Rain")
-                        .HasColumnType("real");
-
-                    b.Property<Guid>("SensorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<float>("Temperature")
-                        .HasColumnType("real");
-
-                    b.Property<string>("TrashType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Latitude", "Longitude", "DateTime")
+                    b.HasIndex("CameraLatitude", "CameraLongitude", "PhotoTakenAtUtc")
                         .IsUnique();
 
                     b.ToTable("TrashDetections");

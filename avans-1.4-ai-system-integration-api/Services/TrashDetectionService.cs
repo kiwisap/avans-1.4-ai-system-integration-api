@@ -1,8 +1,9 @@
 ﻿using avans_1._4_ai_system_integration_api.Models.DTOs;
 using avans_1._4_ai_system_integration_api.Models.Entities;
+using avans_1._4_ai_system_integration_api.Models.Enums;
 using avans_1._4_ai_system_integration_api.Repositories.Interfaces;
 using avans_1._4_ai_system_integration_api.Services.Interfaces;
-using Microsoft.Extensions.Caching.Memory;
+using System.ComponentModel.DataAnnotations;
 
 namespace avans_1._4_ai_system_integration_api.Services;
 
@@ -26,6 +27,12 @@ public class TrashDetectionService : ITrashDetectionService
 
     public async Task<List<TrashDetection>> GetTrashDataAsync(DateTime from, DateTime to)
     {
+        if (from > to)
+            throw new ValidationException("'from' moet voor 'to' liggen.");
+
+        if (to > DateTime.UtcNow)
+            throw new ValidationException("'to' mag niet in de toekomst liggen.");
+
         var fetchLog = await _repository.FindFetchLogAsync(from, to);
         var isFresh = fetchLog != null && DateTime.UtcNow - fetchLog.FetchedAtUtc < CacheDuration;
 
@@ -73,23 +80,23 @@ public class TrashDetectionService : ITrashDetectionService
     {
         entity = null;
         
-        if (!Enum.TryParse<TrashType>(dto.Type, true, out var trashType))
+        if (!Enum.TryParse<TrashType>(dto.TrashType, true, out var trashType))
         {
-            error = $"Onbekend afvaltype: {dto.Type}";
+            error = $"Onbekend afvaltype: {dto.TrashType}";
             return false;
         }
-        if (dto.CameraLatitude < -90 || dto.CameraLatitude > 90)
+        if (dto.Latitude < -90 || dto.Latitude > 90)
         {
             error = "Latitude buiten geldig bereik (-90 tot 90)";
             return false;
         }
 
-        if (dto.CameraLongitude < -180 || dto.CameraLongitude > 180)
+        if (dto.Longitude < -180 || dto.Longitude > 180)
         {
             error = "Longitude buiten geldig bereik (-180 tot 180)";
             return false;
         }
-        if (dto.PhotoTakenAtUtc > DateTime.UtcNow)
+        if (dto.DateTime > DateTime.UtcNow)
         {
             error = "Tijdstip foto ligt in de toekomst";
             return false;
@@ -97,12 +104,15 @@ public class TrashDetectionService : ITrashDetectionService
 
         entity = new TrashDetection
         {
-            CameraLatitude = dto.CameraLatitude,
-            CameraLongitude = dto.CameraLongitude,
-            PhotoTakenAtUtc = dto.PhotoTakenAtUtc,
-            TemperatureCelsius = dto.TemperatureCelsius,
-            Type = trashType,
-            Statiegeld = dto.Statiegeld,
+            SensorId = dto.Id,
+            TrashType = dto.TrashType,
+            Latitude = dto.Latitude,
+            Longitude = dto.Longitude,
+            DateTime = dto.DateTime,
+            Temperature = dto.Temperature,
+            Rain = dto.Rain,
+            Confidence = dto.Confidence,
+            ImageId = dto.ImageId,
             FetchedAtUtc = DateTime.UtcNow
         };
         error = null;

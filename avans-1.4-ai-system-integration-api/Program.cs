@@ -75,17 +75,6 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<IUserMappingService, UserMappingService>();
 builder.Services.AddTransient<IAccountService, AccountService>();
 
-
-// HttpClient for the sensor API
-builder.Services.AddHttpClient<ISensorApiClient, SensorApiClient>(client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["SensorApi:BaseUrl"]!);
-});
-
-// Repository + Service
-builder.Services.AddScoped<ITrashDetectionRepository, TrashDetectionRepository>();
-builder.Services.AddScoped<ITrashDetectionService, TrashDetectionService>();
-
 // Register an HttpClient for communicating with the external sensor API, with the base URL configured from app settings.
 builder.Services.AddHttpClient<ISensorApiClient, SensorApiClient>(client =>
 {
@@ -103,8 +92,17 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<TrashDetectionDbContext>();
-    db.Database.Migrate();
+
+    if (db.Database.IsRelational())
+    {
+        db.Database.Migrate();
+    }
+    else
+    {
+        db.Database.EnsureCreated();
+    }
 }
+
 
 // Register OpenAPI/Swagger endpoints.
 if (app.Environment.IsDevelopment())
@@ -147,3 +145,4 @@ app.MapGroup("/api/identity")
    .MapIdentityApi<User>();
 
 app.Run();
+

@@ -14,10 +14,12 @@ public class SensorApiClient : ISensorApiClient
         _httpClient = httpClient;
     }
 
-    public async Task<List<SensorTrashDataDTO>> GetLatestDetectionsAsync(DateTime from, DateTime to)
+    public async Task<List<SensorTrashDataDTO>> GetLatestDetectionsAsync(DateTime StartDate, DateTime EndDate)
     {
-        // Pad en query parameters nog aanpassen aan de echte sensoring-API
-        var url = $"https://avansict2244909.azurewebsites.net/data?from={from:yyyy-MM-ddTHH:mm:ssZ}&to={to:yyyy-MM-ddTHH:mm:ssZ}";
+        // Format DateTime as ISO 8601 strings for URL query parameters
+        var start = StartDate.ToString("o");
+        var end = EndDate.ToString("o");
+        var url = $"https://avansict2244909.azurewebsites.net/trash/timeframe?start={Uri.EscapeDataString(start)}&end={Uri.EscapeDataString(end)}";
 
         var response = await _httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();

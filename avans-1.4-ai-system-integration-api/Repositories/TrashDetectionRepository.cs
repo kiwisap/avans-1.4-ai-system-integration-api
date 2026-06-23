@@ -2,22 +2,24 @@
 using avans_1._4_ai_system_integration_api.Repositories.Interfaces;
 using avans_1_4_ai_system_integration_api.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace avans_1._4_ai_system_integration_api.Repositories;
-
 public class TrashDetectionRepository : ITrashDetectionRepository
 {
     private readonly TrashDetectionDbContext _context;
+    private readonly ILogger<TrashDetectionRepository> _logger;
 
-    public TrashDetectionRepository(TrashDetectionDbContext context)
+    public TrashDetectionRepository(TrashDetectionDbContext context, ILogger<TrashDetectionRepository> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public async Task<List<TrashDetection>> GetByRangeAsync(DateTime from, DateTime to)
     {
         return await _context.TrashDetections
-            .Where(t => t.PhotoTakenAtUtc >= from && t.PhotoTakenAtUtc <= to)
+            .Where(t => t.DateTime >= from && t.DateTime <= to)
             .ToListAsync();
     }
 
@@ -26,22 +28,21 @@ public class TrashDetectionRepository : ITrashDetectionRepository
     {
         foreach (var detection in detections)
         {
-            var alreadyExists = await _context.TrashDetections.AnyAsync(t =>
-                t.CameraLatitude == detection.CameraLatitude &&
-                t.CameraLongitude == detection.CameraLongitude &&
-                t.PhotoTakenAtUtc == detection.PhotoTakenAtUtc);
-
-            if (!alreadyExists)
+            try
             {
-                await _context.TrashDetections.AddAsync(detection);
+                _context.TrashDetections.Add(detection);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogWarning(ex, "Dubbele TrashDetection overgeslagen: camera ({Lat}, {Lng}) op {Time}",
+                    detection.Latitude, detection.Longitude, detection.DateTime);
+                // zorgt ervoor dat de entity niet in de context blijft hangen
+                _context.Entry(detection).State = EntityState.Detached;
             }
         }
     }
 
-    public async Task SaveChangesAsync()
-    {
-        await _context.SaveChangesAsync();
-    }
 
     // nodig om te checken of er al een fetch log is voor de opgegeven range
     public async Task<TrashDataFetchLog?> FindFetchLogAsync(DateTime from, DateTime to)
@@ -53,6 +54,10 @@ public class TrashDetectionRepository : ITrashDetectionRepository
     }
     public async Task AddFetchLogAsync(TrashDataFetchLog log)
     {
-        await _context.TrashDataFetchLogs.AddAsync(log);
+        _context.TrashDataFetchLogs.Add(log);
+    }
+    public Task SaveChangesAsync()
+    {
+        throw new NotImplementedException();
     }
 }

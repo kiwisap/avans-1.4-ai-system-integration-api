@@ -20,12 +20,6 @@ public class TrashDataController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetTrashData([FromQuery] DateTime from, [FromQuery] DateTime to)
     {
-        if (from > to)
-            return BadRequest(new { message = "'from' moet voor 'to' liggen." });
-
-        if (to > DateTime.UtcNow)
-            return BadRequest(new { message = "'to' mag niet in de toekomst liggen." });
-
         var data = await _trashDetectionService.GetTrashDataAsync(from, to);
         return Ok(data);
     }
