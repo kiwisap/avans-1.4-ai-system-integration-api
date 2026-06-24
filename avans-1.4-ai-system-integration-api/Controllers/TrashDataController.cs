@@ -10,7 +10,7 @@ namespace avans_1._4_ai_system_integration_api.Controllers;
 public class TrashDataController(ITrashDetectionService trashDetectionService) : ControllerBase
 {
     [HttpPost]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Identity.Bearer")]
     public async Task<IActionResult> GetTrashData(TrashDataTimeFrameDto trashDataTimeFrame)
     {
         var data = await trashDetectionService.GetTrashDataAsync(trashDataTimeFrame.StartDate, trashDataTimeFrame.EndDate);
