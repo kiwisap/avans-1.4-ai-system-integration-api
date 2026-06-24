@@ -69,6 +69,7 @@ builder.Services.AddHttpContextAccessor();
 
 // Register services for handling user account operations
 builder.Services.AddTransient<IUserMappingService, UserMappingService>();
+builder.Services.AddTransient<ITrashDetectionMappingService, TrashDetectionMappingService>();
 builder.Services.AddTransient<IAccountService, AccountService>();
 
 // Register the sensor API service with an HTTP client, configuring the base address from configuration
@@ -86,21 +87,6 @@ builder.Services.AddScoped<ITrashDetectionService, TrashDetectionService>();
 
 
 var app = builder.Build();
-
-// Apply any pending database migrations on startup to ensure the database schema is up to date.
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<TrashDetectionDbContext>();
-
-    if (db.Database.IsRelational())
-    {
-        db.Database.Migrate();
-    }
-    else
-    {
-        db.Database.EnsureCreated();
-    }
-}
 
 app.MapOpenApi(); // serves /openapi/v1.json
 

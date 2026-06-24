@@ -1,8 +1,8 @@
-﻿using avans_1._4_ai_system_integration_api.Models.Entities;
+﻿using avans_1._4_ai_system_integration_api.Models.Dtos;
 
 namespace avans_1._4_ai_system_integration_api.Services.Interfaces;
 
 public interface ITrashDetectionService
 {
-    Task<List<TrashDetection>> GetTrashDataAsync(DateTime from, DateTime to);
+    Task<List<TrashDetectionDto>> GetTrashDataAsync(DateTime from, DateTime to);
 }

@@ -1,4 +1,5 @@
-﻿using avans_1._4_ai_system_integration_api.Models.Dtos;
+﻿using avans_1._4_ai_system_integration_api.Mapping.Interfaces;
+using avans_1._4_ai_system_integration_api.Models.Dtos;
 using avans_1._4_ai_system_integration_api.Models.Entities;
 using avans_1._4_ai_system_integration_api.Models.Enums;
 using avans_1._4_ai_system_integration_api.Repositories.Interfaces;
@@ -7,25 +8,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace avans_1._4_ai_system_integration_api.Services;
 
-public class TrashDetectionService : ITrashDetectionService
+public class TrashDetectionService(
+    ISensorApiService sensorApiService,
+    ITrashDetectionMappingService trashDetectionMappingService,
+    ITrashDetectionRepository repository,
+    ILogger<TrashDetectionService> logger) : ITrashDetectionService
 {
-    private readonly ISensorApiService _sensorApiService;
-    private readonly ITrashDetectionRepository _repository;
-    private readonly ILogger<TrashDetectionService> _logger;
-
     private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(30);
 
-    public TrashDetectionService(
-        ISensorApiService sensorApiService,
-        ITrashDetectionRepository repository,
-        ILogger<TrashDetectionService> logger)
-    {
-        _sensorApiService = sensorApiService;
-        _repository = repository;
-        _logger = logger;
-    }
-
-    public async Task<List<TrashDetection>> GetTrashDataAsync(DateTime from, DateTime to)
+    public async Task<List<TrashDetectionDto>> GetTrashDataAsync(DateTime from, DateTime to)
     {
         if (from > to)
             throw new ValidationException("'from' moet voor 'to' liggen.");
@@ -33,31 +24,32 @@ public class TrashDetectionService : ITrashDetectionService
         if (to > DateTime.UtcNow)
             throw new ValidationException("'to' mag niet in de toekomst liggen.");
 
-        var fetchLog = await _repository.FindFetchLogAsync(from, to);
+        var fetchLog = await repository.FindFetchLogAsync(from, to);
         var isFresh = fetchLog != null && DateTime.UtcNow - fetchLog.FetchedAtUtc < CacheDuration;
 
         if (isFresh)
         {
-            _logger.LogInformation("Data voor range {From} - {To} is nog vers, ophalen uit database", from, to);
-            return await _repository.GetByRangeAsync(from, to);
+            logger.LogInformation("Data voor range {From} - {To} is nog vers, ophalen uit database", from, to);
+            var entitiesFresh = await repository.GetByRangeAsync(from, to);
+            return [.. entitiesFresh.Select(trashDetectionMappingService.TrashDetectionToTrashDetectionDto)];
         }
 
-        _logger.LogInformation("Data voor range {From} - {To} is niet vers, ophalen van API", from, to);
+        logger.LogInformation("Data voor range {From} - {To} is niet vers, ophalen van API", from, to);
 
-        var sensorData = await _sensorApiService.GetDetectionsAsync(from, to);
+        var sensorData = await sensorApiService.GetDetectionsAsync(from, to);
         var entities = MapAndValidate(sensorData);
 
-        await _repository.AddRangeAsync(entities);
-        await _repository.AddFetchLogAsync(new TrashDataFetchLog
+        await repository.AddRangeAsync(entities);
+        await repository.AddFetchLogAsync(new TrashDataFetchLog
         {
             RangeFrom = from,
             RangeTo = to,
             FetchedAtUtc = DateTime.UtcNow
         });
 
-        await _repository.SaveChangesAsync();
+        await repository.SaveChangesAsync();
 
-        return entities;
+        return [.. entities.Select(trashDetectionMappingService.TrashDetectionToTrashDetectionDto)];
     }
 
     private List<TrashDetection> MapAndValidate(List<SensorTrashDataDto> dTOs)
@@ -68,7 +60,7 @@ public class TrashDetectionService : ITrashDetectionService
         {
             if (!TryValidateAndMap(dto, out var entity, out var error))
             {
-                _logger.LogWarning("Ongeldige data gedetecteerd: {Error}", error);
+                logger.LogWarning("Ongeldige data gedetecteerd: {Error}", error);
                 continue;
             }
             result.Add(entity);
