@@ -2,23 +2,13 @@
 using avans_1._4_ai_system_integration_api.Repositories.Interfaces;
 using avans_1_4_ai_system_integration_api.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace avans_1._4_ai_system_integration_api.Repositories;
-public class TrashDetectionRepository : ITrashDetectionRepository
+public class TrashDetectionRepository(TrashDetectionDbContext context, ILogger<TrashDetectionRepository> logger) : ITrashDetectionRepository
 {
-    private readonly TrashDetectionDbContext _context;
-    private readonly ILogger<TrashDetectionRepository> _logger;
-
-    public TrashDetectionRepository(TrashDetectionDbContext context, ILogger<TrashDetectionRepository> logger)
-    {
-        _context = context;
-        _logger = logger;
-    }
-
     public async Task<List<TrashDetection>> GetByRangeAsync(DateTime from, DateTime to)
     {
-        return await _context.TrashDetections
+        return await context.TrashDetections
             .Where(t => t.DateTime >= from && t.DateTime <= to)
             .ToListAsync();
     }
@@ -30,15 +20,15 @@ public class TrashDetectionRepository : ITrashDetectionRepository
         {
             try
             {
-                _context.TrashDetections.Add(detection);
-                await _context.SaveChangesAsync();
+                context.TrashDetections.Add(detection);
+                await context.SaveChangesAsync();
             }
             catch (DbUpdateException ex)
             {
-                _logger.LogWarning(ex, "Dubbele TrashDetection overgeslagen: camera ({Lat}, {Lng}) op {Time}",
+                logger.LogWarning(ex, "Dubbele TrashDetection overgeslagen: camera ({Lat}, {Lng}) op {Time}",
                     detection.Latitude, detection.Longitude, detection.DateTime);
                 // zorgt ervoor dat de entity niet in de context blijft hangen
-                _context.Entry(detection).State = EntityState.Detached;
+                context.Entry(detection).State = EntityState.Detached;
             }
         }
     }
@@ -47,17 +37,15 @@ public class TrashDetectionRepository : ITrashDetectionRepository
     // nodig om te checken of er al een fetch log is voor de opgegeven range
     public async Task<TrashDataFetchLog?> FindFetchLogAsync(DateTime from, DateTime to)
     {
-        return await _context.TrashDataFetchLogs
+        return await context.TrashDataFetchLogs
             .Where(l => l.RangeFrom == from && l.RangeTo == to)
             .OrderByDescending(l => l.FetchedAtUtc)
             .FirstOrDefaultAsync();
     }
+
     public async Task AddFetchLogAsync(TrashDataFetchLog log)
     {
-        _context.TrashDataFetchLogs.Add(log);
-    }
-    public Task SaveChangesAsync()
-    {
-        throw new NotImplementedException();
+        context.TrashDataFetchLogs.Add(log);
+        await context.SaveChangesAsync();
     }
 }

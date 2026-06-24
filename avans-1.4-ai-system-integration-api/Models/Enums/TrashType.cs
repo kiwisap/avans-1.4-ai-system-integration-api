@@ -2,11 +2,10 @@
 
 public enum TrashType
 {
-    PLASTIC,
-    PAPIER_KARTON,
-    GLAS,
-    BLIK,
-    GROFVUIL,
-    ELEKTRISCHE_APPARATEN,
-    REST
+    Plastic,
+    Paper,
+    Glass,
+    Can,
+    Bulky_Waste,
+    Rest
 }

@@ -1,4 +1,5 @@
-﻿using avans_1._4_ai_system_integration_api.Mapping.Interfaces;
+﻿using avans_1._4_ai_system_integration_api.Extensions;
+using avans_1._4_ai_system_integration_api.Mapping.Interfaces;
 using avans_1._4_ai_system_integration_api.Models.Dtos;
 using avans_1._4_ai_system_integration_api.Models.Entities;
 using avans_1._4_ai_system_integration_api.Models.Enums;
@@ -20,12 +21,12 @@ public class TrashDetectionService(
     {
         if (from > to)
             throw new ValidationException("'from' moet voor 'to' liggen.");
-
+        
         if (to > DateTime.UtcNow)
             throw new ValidationException("'to' mag niet in de toekomst liggen.");
 
         var fetchLog = await repository.FindFetchLogAsync(from, to);
-        var isFresh = fetchLog != null && DateTime.UtcNow - fetchLog.FetchedAtUtc < CacheDuration;
+        var isFresh = fetchLog != null && DateTime.UtcNow - fetchLog.FetchedAtUtc < CacheDuration; ;
 
         if (isFresh)
         {
@@ -46,8 +47,6 @@ public class TrashDetectionService(
             RangeTo = to,
             FetchedAtUtc = DateTime.UtcNow
         });
-
-        await repository.SaveChangesAsync();
 
         return [.. entities.Select(trashDetectionMappingService.TrashDetectionToTrashDetectionDto)];
     }
@@ -72,7 +71,7 @@ public class TrashDetectionService(
     {
         entity = null;
         
-        if (!Enum.TryParse<TrashType>(dto.TrashType, true, out var trashType))
+        if (!Enum.TryParse<TrashType>(dto.TrashType.ToTitleCaseWithUnderscores(), true, out var trashType))
         {
             error = $"Onbekend afvaltype: {dto.TrashType}";
             return false;
@@ -97,7 +96,7 @@ public class TrashDetectionService(
         entity = new TrashDetection
         {
             SensorId = dto.Id,
-            TrashType = dto.TrashType,
+            TrashType = trashType.ToString(),
             Latitude = dto.Latitude,
             Longitude = dto.Longitude,
             DateTime = dto.DateTime,
