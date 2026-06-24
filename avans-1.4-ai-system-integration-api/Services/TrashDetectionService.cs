@@ -1,4 +1,4 @@
-﻿using avans_1._4_ai_system_integration_api.Models.DTOs;
+﻿using avans_1._4_ai_system_integration_api.Models.Dtos;
 using avans_1._4_ai_system_integration_api.Models.Entities;
 using avans_1._4_ai_system_integration_api.Models.Enums;
 using avans_1._4_ai_system_integration_api.Repositories.Interfaces;
@@ -9,18 +9,18 @@ namespace avans_1._4_ai_system_integration_api.Services;
 
 public class TrashDetectionService : ITrashDetectionService
 {
-    private readonly ISensorApiClient _sensorApiClient;
+    private readonly ISensorApiService _sensorApiService;
     private readonly ITrashDetectionRepository _repository;
     private readonly ILogger<TrashDetectionService> _logger;
 
     private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(30);
 
     public TrashDetectionService(
-        ISensorApiClient sensorApiClient,
+        ISensorApiService sensorApiService,
         ITrashDetectionRepository repository,
         ILogger<TrashDetectionService> logger)
     {
-        _sensorApiClient = sensorApiClient;
+        _sensorApiService = sensorApiService;
         _repository = repository;
         _logger = logger;
     }
@@ -44,7 +44,7 @@ public class TrashDetectionService : ITrashDetectionService
 
         _logger.LogInformation("Data voor range {From} - {To} is niet vers, ophalen van API", from, to);
 
-        var sensorData = await _sensorApiClient.GetLatestDetectionsAsync(from, to);
+        var sensorData = await _sensorApiService.GetDetectionsAsync(from, to);
         var entities = MapAndValidate(sensorData);
 
         await _repository.AddRangeAsync(entities);
@@ -60,7 +60,7 @@ public class TrashDetectionService : ITrashDetectionService
         return entities;
     }
 
-    private List<TrashDetection> MapAndValidate(List<SensorTrashDataDTO> dTOs)
+    private List<TrashDetection> MapAndValidate(List<SensorTrashDataDto> dTOs)
     {
         var result = new List<TrashDetection>();
 
@@ -76,7 +76,7 @@ public class TrashDetectionService : ITrashDetectionService
         return result;
     }
 
-    private bool TryValidateAndMap(SensorTrashDataDTO dto, out TrashDetection? entity, out string? error)
+    private bool TryValidateAndMap(SensorTrashDataDto dto, out TrashDetection? entity, out string? error)
     {
         entity = null;
         

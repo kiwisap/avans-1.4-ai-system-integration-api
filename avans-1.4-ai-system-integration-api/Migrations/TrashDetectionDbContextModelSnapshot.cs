@@ -3,7 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using avans_1_4_ai_system_integration_api.Data;
 
@@ -12,11 +11,9 @@ using avans_1_4_ai_system_integration_api.Data;
 namespace avans_1._4_ai_system_integration_api.Migrations
 {
     [DbContext(typeof(TrashDetectionDbContext))]
-    [Migration("20260623101938_UpdateTrashDetectionToSensorModel")]
-    partial class UpdateTrashDetectionToSensorModel
+    partial class TrashDetectionDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

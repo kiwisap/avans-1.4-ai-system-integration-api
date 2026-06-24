@@ -5,6 +5,7 @@ using avans_1._4_ai_system_integration_api.Repositories;
 using avans_1._4_ai_system_integration_api.Repositories.Interfaces;
 using avans_1._4_ai_system_integration_api.Services;
 using avans_1._4_ai_system_integration_api.Services.Interfaces;
+using avans_1._4_ai_system_integration_api.Transformers;
 using avans_1_4_ai_system_integration_api.Data;
 using avans_1_4_ai_system_integration_api.Exceptions;
 using Microsoft.EntityFrameworkCore;
@@ -28,16 +29,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddExceptionHandler<TrashDetectionExceptionHandler>();
 builder.Services.AddProblemDetails();
 
-// Register OpenAPI/Swagger for API documentation and testing.
-builder.Services.AddSwaggerGen(options =>
+// Register OpenAPI for API documentation and testing.
+builder.Services.AddOpenApi(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "Trash Detection API",
-        Version = "v1"
-    });
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
 });
-
 
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
@@ -75,10 +71,13 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<IUserMappingService, UserMappingService>();
 builder.Services.AddTransient<IAccountService, AccountService>();
 
-// Register an HttpClient for communicating with the external sensor API, with the base URL configured from app settings.
-builder.Services.AddHttpClient<ISensorApiClient, SensorApiClient>(client =>
+// Register the sensor API service with an HTTP client, configuring the base address from configuration
+builder.Services.AddHttpClient<ISensorApiService, SensorApiService>((sp, client) =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["SensorApi:BaseUrl"]!);
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    client.BaseAddress = new Uri(
+        configuration["SensorApiBaseUrl"]
+        ?? throw new InvalidOperationException("SensorApiBaseUrl is not configured."));
 });
 
 // Register the repository and service for handling trash detection data, with scoped lifetimes to ensure a new instance per request.
@@ -103,16 +102,15 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+app.MapOpenApi(); // serves /openapi/v1.json
 
 // Register OpenAPI/Swagger endpoints.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Trash Detection API v1");
-        options.RoutePrefix = "swagger"; // Access at /swagger
-        options.CacheLifetime = TimeSpan.Zero; // Disable caching for development
+        options.SwaggerEndpoint("/openapi/v1.json", "Trash Detection API v1");
+        options.RoutePrefix = "swagger";
     });
 }
 else

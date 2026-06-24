@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace avans_1._4_ai_system_integration_api.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -49,6 +49,42 @@ namespace avans_1._4_ai_system_integration_api.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TrashDataFetchLogs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RangeFrom = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    RangeTo = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FetchedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TrashDataFetchLogs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TrashDetections",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SensorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TrashType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Latitude = table.Column<float>(type: "real", nullable: false),
+                    Longitude = table.Column<float>(type: "real", nullable: false),
+                    DateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Temperature = table.Column<float>(type: "real", nullable: false),
+                    Rain = table.Column<float>(type: "real", nullable: false),
+                    Confidence = table.Column<float>(type: "real", nullable: false),
+                    ImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FetchedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TrashDetections", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -195,6 +231,12 @@ namespace avans_1._4_ai_system_integration_api.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TrashDetections_Latitude_Longitude_DateTime",
+                table: "TrashDetections",
+                columns: new[] { "Latitude", "Longitude", "DateTime" },
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -214,6 +256,12 @@ namespace avans_1._4_ai_system_integration_api.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "TrashDataFetchLogs");
+
+            migrationBuilder.DropTable(
+                name: "TrashDetections");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

@@ -12,8 +12,8 @@ using avans_1_4_ai_system_integration_api.Data;
 namespace avans_1._4_ai_system_integration_api.Migrations
 {
     [DbContext(typeof(TrashDetectionDbContext))]
-    [Migration("20260622000454_ChangeTrashDetectionIdToGuid")]
-    partial class ChangeTrashDetectionIdToGuid
+    [Migration("20260624093553_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -186,30 +186,40 @@ namespace avans_1._4_ai_system_integration_api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("CameraLatitude")
-                        .HasColumnType("float");
+                    b.Property<float>("Confidence")
+                        .HasColumnType("real");
 
-                    b.Property<double>("CameraLongitude")
-                        .HasColumnType("float");
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("FetchedAtUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("PhotoTakenAtUtc")
-                        .HasColumnType("datetime2");
+                    b.Property<Guid>("ImageId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("Statiegeld")
-                        .HasColumnType("bit");
+                    b.Property<float>("Latitude")
+                        .HasColumnType("real");
 
-                    b.Property<double>("TemperatureCelsius")
-                        .HasColumnType("float");
+                    b.Property<float>("Longitude")
+                        .HasColumnType("real");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                    b.Property<float>("Rain")
+                        .HasColumnType("real");
+
+                    b.Property<Guid>("SensorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<float>("Temperature")
+                        .HasColumnType("real");
+
+                    b.Property<string>("TrashType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CameraLatitude", "CameraLongitude", "PhotoTakenAtUtc")
+                    b.HasIndex("Latitude", "Longitude", "DateTime")
                         .IsUnique();
 
                     b.ToTable("TrashDetections");

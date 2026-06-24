@@ -2,7 +2,7 @@
 
 namespace avans_1._4_ai_system_integration_api.Services.Interfaces;
 
-public interface ISensorApiClient
+public interface ISensorApiService
 {
-    Task<List<SensorTrashDataDto>> GetLatestDetectionsAsync(DateTime from, DateTime to);
+    Task<List<SensorTrashDataDto>> GetDetectionsAsync(DateTime startDate, DateTime endDate);
 }
