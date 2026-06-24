@@ -8,6 +8,7 @@ using avans_1._4_ai_system_integration_api.Services.Interfaces;
 using avans_1._4_ai_system_integration_api.Transformers;
 using avans_1_4_ai_system_integration_api.Data;
 using avans_1_4_ai_system_integration_api.Exceptions;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using System.Reflection;
@@ -84,6 +85,10 @@ builder.Services.AddHttpClient<ISensorApiService, SensorApiService>((sp, client)
 // Register the repository and service for handling trash detection data, with scoped lifetimes to ensure a new instance per request.
 builder.Services.AddScoped<ITrashDetectionRepository, TrashDetectionRepository>();
 builder.Services.AddScoped<ITrashDetectionService, TrashDetectionService>();
+
+// Register the repository and service for handling user data, with scoped lifetimes to ensure a new instance per request.
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/home/DataProtection-Keys"));
 
 
 var app = builder.Build();
