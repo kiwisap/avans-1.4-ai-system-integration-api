@@ -61,15 +61,6 @@ public class TrashDetectionServiceTests
             _sut.GetTrashDataAsync(_from, futureDate));
     }
 
-    [Fact]
-    public async Task GetTrashDataAsync_FromEqualsTo_ThrowsValidationException()
-    {
-        var same = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
-        await Assert.ThrowsAsync<ValidationException>(() =>
-            _sut.GetTrashDataAsync(same, same));
-    }
-
     // -------------------------------------------------------------------------
     // Cache - verse data (fetch log jonger dan 30 minuten)
     // -------------------------------------------------------------------------

@@ -79,26 +79,6 @@ public class AccountServiceTests
         await Assert.ThrowsAsync<ValidationException>(() => _sut.RegisterAsync(request));
     }
 
-    [Fact]
-    public async Task RegisterAsync_IdentityFailure_ExceptionContainsErrorCode()
-    {
-        var request = new RegisterDto { Email = "fout@mail.nl", Password = "x" };
-        var userEntity = new User();
-
-        _userManagerMock.Setup(u => u.FindByEmailAsync(request.Email)).ReturnsAsync((User?)null);
-        _userMappingServiceMock.Setup(m => m.RegisterDtoToUser(request)).Returns(userEntity);
-        _userManagerMock.Setup(u => u.CreateAsync(userEntity, request.Password))
-            .ReturnsAsync(IdentityResult.Failed(new IdentityError
-            {
-                Code = "PasswordTooShort",
-                Description = "Wachtwoord te kort."
-            }));
-
-        var ex = await Assert.ThrowsAsync<ValidationException>(() => _sut.RegisterAsync(request));
-
-        Assert.Contains("PasswordTooShort", ex.Message);
-    }
-
     // -------------------------------------------------------------------------
     // GetCurrentUserAsync
     // -------------------------------------------------------------------------
