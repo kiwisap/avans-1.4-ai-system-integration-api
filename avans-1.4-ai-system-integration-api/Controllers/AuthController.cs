@@ -1,4 +1,4 @@
-﻿using avans_1._4_ai_system_integration_api.Models.DTOs;
+﻿using avans_1._4_ai_system_integration_api.Models.Dtos;
 using avans_1._4_ai_system_integration_api.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +19,7 @@ public class AuthController : ControllerBase
     // POST api/auth/register
     [HttpPost("register")]
     [AllowAnonymous]
-    public async Task<IActionResult> Register([FromBody] RegisterDTO request)
+    public async Task<IActionResult> Register([FromBody] RegisterDto request)
     {
         var user = await _accountService.RegisterAsync(request);
         return Ok(user);

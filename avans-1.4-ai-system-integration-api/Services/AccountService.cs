@@ -3,10 +3,10 @@ using avans_1._4_ai_system_integration_api.Services.Interfaces;
 using avans_1_4_ai_system_integration_api.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using avans_1._4_ai_system_integration_api.Mapping.Interfaces;
-using avans_1._4_ai_system_integration_api.Models.DTOs;
+using avans_1._4_ai_system_integration_api.Models.Dtos;
 using System.Security.Claims;
 
-namespace avans_1._4_ai_system_integration_api.Services.Interfaces;
+namespace avans_1._4_ai_system_integration_api.Services;
 
 public class AccountService : IAccountService
 {
@@ -22,7 +22,7 @@ public class AccountService : IAccountService
         _userMappingService = userMappingService;
     }
 
-    public async Task<UserDTO> RegisterAsync(RegisterDTO request)
+    public async Task<UserDto> RegisterAsync(RegisterDto request)
     {
         var existingUser = await _userManager.FindByEmailAsync(request.Email);
         if (existingUser != null)
@@ -46,7 +46,7 @@ public class AccountService : IAccountService
         return _userMappingService.UserToUserDto(user);
     }
 
-    public async Task<UserDTO> GetCurrentUserAsync(ClaimsPrincipal principal)
+    public async Task<UserDto> GetCurrentUserAsync(ClaimsPrincipal principal)
     {
         var user = await ValidateUserExists(principal);
 

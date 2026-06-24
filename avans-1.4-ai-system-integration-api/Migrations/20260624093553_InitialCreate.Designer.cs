@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using avans_1_4_ai_system_integration_api.Data;
 
@@ -11,9 +12,11 @@ using avans_1_4_ai_system_integration_api.Data;
 namespace avans_1._4_ai_system_integration_api.Migrations
 {
     [DbContext(typeof(TrashDetectionDbContext))]
-    partial class TrashDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260624093553_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -153,6 +156,73 @@ namespace avans_1._4_ai_system_integration_api.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("avans_1._4_ai_system_integration_api.Models.Entities.TrashDataFetchLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("FetchedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("RangeFrom")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("RangeTo")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TrashDataFetchLogs");
+                });
+
+            modelBuilder.Entity("avans_1._4_ai_system_integration_api.Models.Entities.TrashDetection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<float>("Confidence")
+                        .HasColumnType("real");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FetchedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ImageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<float>("Latitude")
+                        .HasColumnType("real");
+
+                    b.Property<float>("Longitude")
+                        .HasColumnType("real");
+
+                    b.Property<float>("Rain")
+                        .HasColumnType("real");
+
+                    b.Property<Guid>("SensorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<float>("Temperature")
+                        .HasColumnType("real");
+
+                    b.Property<string>("TrashType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Latitude", "Longitude", "DateTime")
+                        .IsUnique();
+
+                    b.ToTable("TrashDetections");
                 });
 
             modelBuilder.Entity("avans_1._4_ai_system_integration_api.Models.Entities.User", b =>
